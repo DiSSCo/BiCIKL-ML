@@ -21,7 +21,7 @@ from imblearn.ensemble import BalancedRandomForestClassifier
 #   [2] Trained on geo: country data included in training set
 #   [3] Hashed data: if yes, levels are hashed. if false, levels are ordinal
 #   [4] BalancedTree: type of random forest classifier
-#   [5] Model name: name of our model
+#   [5] Model name: name of our modelrun
 
 n_threads = 3
 

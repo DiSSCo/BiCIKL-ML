@@ -1,23 +1,28 @@
 #!/bin/bash
 
 # Control: Data are not stratified
-python3 RandomForest.py -n Mod_0 -CT T
+nohup python3 RandomForestDummy.py -n Mod_0 -CT T > mod0.out &
+echo "model 0 finished"
 
 # Data are stratified
-python3 RandomForestDummy.py -n Mod_1_dum
+nohup python3 RandomForestDummy.py -n Mod_1_dum > mod1.out &
+echo "model 1 finished"
 
 # Model 2: Weights balanced
-python3 RandomForestDummy.py -n Mod_2_WB_dum -WB T
+nohup python3 RandomForestDummy.py -n Mod_2_WB_dum -WB T > mod2.out &
+echo "model 2 finished"
 
 # Model 3: Geo Training included
-python3 RandomForestDummy.py -n Mod_3_GT_dum -GT T
+nohup python3 RandomForestDummy.py -n Mod_3_GT_dum -GT T > mod3.out &
+echo "model 3 finished"
 
 # Model 4: Using Hashed Data
-python3 RandomForestDummy.py -n Mod_4_GT_dum -HD T
+nohup python3 RandomForestDummy.py -n Mod_4_GT_dum -HD T > mod4.out &
+echo "model 4 finished"
 
 # Model 5: Using SMOTE
-python3 RandomForestDummy.py -n Mod_5_GT_dum -SM T
+nohup python3 RandomForestDummy.py -n Mod_5_GT_dum -SM T > mod5.out &
+echo "model 5 finished"
 
 
-
-# get bounding box around occurence points (coords)
+# get bounding box around occurence points (coords)ls
