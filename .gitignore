@@ -1,4 +1,8 @@
+# Ignore csv
 *.csv
+
+# Ignore archives
 *.tar.gz
+
 *.tar.xz
 *.7z

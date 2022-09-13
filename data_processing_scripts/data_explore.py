@@ -1,5 +1,6 @@
 import hashlib
 
+import argparse as argparse
 import numpy as np
 import pandas as pd
 import requests
@@ -9,7 +10,7 @@ import os
 import sys
 import argparse
 
-
+import requests as requests
 from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction import FeatureHasher, DictVectorizer
 
@@ -37,6 +38,40 @@ HASHED_DATA = sys.argv[3]
 BALANCED_TREE = sys.argv[4]
 MODEL_NAME = sys.argv[5]
 '''
+
+pwd = os.path.dirname(__file__)
+
+class_path = os.path.join(pwd, os.path.relpath("processed_data/classes.csv", pwd))
+int_mapped_path = os.path.join(pwd, os.path.relpath("processed_data/Pollinator_Plant_int_mapped.csv", pwd))
+poll_plant_path = os.path.join(pwd, os.path.relpath("processed_data/Pollinator_Plant_hash_mapped.csv", pwd))
+corrupted_path = os.path.join(pwd, os.path.relpath("processed_data/Corrupted_PollPlant.csv", pwd))
+
+
+classes = pd.read_csv(class_path)
+int_mapped = pd.read_csv(int_mapped_path)
+hash = pd.read_csv(poll_plant_path)
+corrupted = pd.read_csv(corrupted_path)
+
+print("int mapped: ",int_mapped.columns)
+print("hash mapped: ", hash.columns)
+print("corrupted: ",corrupted.columns)
+
+print(int_mapped.columns == hash.columns)
+print(hash.columns == corrupted.columns)
+print(int_mapped.columns == corrupted.columns)
+
+
+#print(classes['class'].value_counts())
+#print(classes.shape)
+
+#print(int_mapped.shape)
+#print(hash.shape)
+
+#print(int_mapped.columns)
+#print(hash.columns)
+
+
+breakpoint()
 
 
 # If an argument is set to any string, it will be marked as true. Otherwise it will be false

@@ -15,7 +15,7 @@ rewrite = False  # Set this to true if you want to re-do the corrupted data
 pd.options.mode.chained_assignment = None
 
 pwd = os.path.dirname(__file__)
-source_data_path = os.path.join(pwd, os.path.relpath("source_data/PollPlantsGBIF2.csv", pwd))
+source_data_path = os.path.join(pwd, os.path.relpath("../source_data/PollPlantsGBIF2.csv", pwd))
 
 PollPlants = pd.read_csv(source_data_path)
 PollPlants = PollPlants.dropna()
@@ -60,7 +60,7 @@ poll_num = polls.shape[0]
 plant_num = plants.shape[0]
 
 # Path info
-processed_data_path = "processed_data"
+processed_data_path = "../processed_data"
 processed_data_path = os.path.join(pwd, os.path.relpath(processed_data_path, pwd))
 corrupted_path = processed_data_path + "/Corrupted_PollPlant.csv"  # Where we'll save our corrupted data
 
@@ -109,13 +109,7 @@ if concatenated_df_nas > 0:
     warnings.warn("Concatenated data has NaN values. An error in concatenation has occurred; check index alignment")
 
 # Separate the columns into independent and dependent variables (or features and labels).
-X = concatenated[[
-    'pollinator_kingdom', 'pollinator_phylum', 'pollinator_order', 'pollinator_family',
-    'pollinator_genus', 'pollinator_country',
-
-    'plant_kingdom', 'plant_phylum', 'plant_order', 'plant_family',
-    'plant_genus', 'plant_country']]  # Features
-
+X = concatenated.drop(columns=["class"])
 X_hashed = concatenated.drop(columns=["class"])
 
 y = concatenated['class']  # Labels

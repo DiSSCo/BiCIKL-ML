@@ -29,7 +29,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-CT', '--CONTROL', required=False, type=bool, default=False)
 parser.add_argument('-WB', '--WEIGHT_BALANCE', required=False, type=bool, default=False)
 parser.add_argument('-GT', '--GEO_TRAIN', required=False, type=bool, default=False)
-parser.add_argument('-OD', '--HASHED_DATA', required=False, type=bool, default=False)
+parser.add_argument('-HD', '--HASHED_DATA', required=False, type=bool, default=False)
 parser.add_argument('-SM', '--SMOTE_TREE', required=False, type=bool, default=False)
 parser.add_argument('-n', '--MODEL_NAME', required=True)
 
