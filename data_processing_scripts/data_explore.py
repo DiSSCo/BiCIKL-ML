@@ -1,6 +1,8 @@
 import hashlib
 
 import argparse as argparse
+
+import joblib
 import numpy as np
 import pandas as pd
 import requests
@@ -11,8 +13,11 @@ import sys
 import argparse
 
 import requests as requests
+from imblearn.over_sampling import SMOTE
+from sklearn import preprocessing
 from sklearn.compose import ColumnTransformer
 from sklearn.feature_extraction import FeatureHasher, DictVectorizer
+from sklearn.model_selection import train_test_split
 
 
 def hash_str(s):
@@ -30,16 +35,49 @@ def n_nonzero_columns(X):
 def package(f):
     arr = [f]
     return arr
-'''
-STRAT_TRAIN = sys.argv[0]
-WEIGHT_BALANCE = sys.argv[1]
-GEO_TRAIN = sys.argv[2]
-HASHED_DATA = sys.argv[3]
-BALANCED_TREE = sys.argv[4]
-MODEL_NAME = sys.argv[5]
-'''
+
 
 pwd = os.path.dirname(__file__)
+model_path = os.path.join(pwd, os.path.relpath("random_forest_training/saved_models/Mod_5_SM",pwd))
+processed_path = os.path.join(pwd, os.path.relpath("processed_data", pwd))
+source_path = os.path.join(pwd, os.path.relpath("source_data", pwd))
+
+pollPlants = pd.read_csv(source_path+"/PollPlantsGBIF2.csv")
+print(pollPlants.shape)
+
+breakpoint()
+
+
+X = pd.read_csv(processed_path + "/Pollinator_Plant_int_mapped.csv")
+X = X.drop(columns=["plant_country_int", "pollinator_country_int",
+                        "plant_country_hash", "pollinator_country_hash"], errors='ignore')
+X = X.values  # turn DataFrame into a numpy matrix
+scaler = preprocessing.StandardScaler().fit(X)
+X = scaler.transform(X)
+
+#joblib.dump(scaler, "pollination_scaler.save")
+#joblib.load("pollination_scaler.save")
+
+RFC = joblib.load(model_path)
+
+# Ashmeadiella opuntiae paired with
+
+test_taxon = [[0, 0, 5, 51, 47, 178, 0, 0, 13, 26, 281, 562],  # Lomelosia caucasica -> False
+              [0, 0, 5, 51, 47, 178, 0, 0, 8, 22, 137, 267],   # Cylindropuntia munzii -> True
+              [0, 0, 5, 51, 47, 178, 0, 0, 13, 26, 281, 562]]  # Lomelosia caucasica -> False
+test_taxon = np.array(test_taxon)
+
+test_taxon = scaler.transform(test_taxon)
+
+print(RFC.predict_proba(test_taxon))
+
+breakpoint()
+pwd = os.path.dirname(__file__)
+map_path = os.path.join(pwd, os.path.relpath("processed_data/taxonomy_mapping.csv", pwd))
+mapping = pd.read_csv(map_path)
+mapping.to_csv(map_path, index=False)
+
+breakpoint()
 
 class_path = os.path.join(pwd, os.path.relpath("processed_data/classes.csv", pwd))
 int_mapped_path = os.path.join(pwd, os.path.relpath("processed_data/Pollinator_Plant_int_mapped.csv", pwd))

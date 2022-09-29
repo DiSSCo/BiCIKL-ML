@@ -83,6 +83,7 @@ with parallel_backend('threading', n_jobs=n_threads):
 
 # Save model
 model_path = os.path.join(pwd, os.path.relpath(("saved_models/"+args.MODEL_NAME), pwd))
+print(model_path)
 joblib.dump(random_forest, model_path)
 
 # Model prediction
