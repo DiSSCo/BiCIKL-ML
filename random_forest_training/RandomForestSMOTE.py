@@ -32,7 +32,7 @@ processed_path = os.path.join(pwd, os.path.relpath("../processed_data", pwd))
 # Select the data - Hash or int mapped
 X = pd.read_csv(processed_path + "/Pollinator_Plant_int_mapped.csv")
 
-# If we're not training with geo data, drop these two columns
+# If we're not training with geo data, drop these two colu
 # We're ignoring keyErrors here; essentially, this is "drop if exists"
 X = X.drop(columns=["plant_country_int", "pollinator_country_int",
                     "plant_country_hash", "pollinator_country_hash"], errors='ignore')
