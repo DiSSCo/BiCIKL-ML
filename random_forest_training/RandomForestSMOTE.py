@@ -23,7 +23,7 @@ from imblearn.ensemble import BalancedRandomForestClassifier
 #   [4] BalancedTree: type of random forest classifier
 #   [5] Model name: name of our modelrun
 
-n_threads = 3
+n_threads = 2
 
 pwd = os.getcwd()
 processed_path = os.path.join(pwd, os.path.relpath("../processed_data", pwd))
@@ -61,7 +61,7 @@ with parallel_backend('threading', n_jobs=n_threads):
 
 # Save model
 
-model_path = os.path.join(pwd, os.path.relpath("saved_models/SMOTE_Model", pwd))
+model_path = os.path.join(pwd, os.path.relpath("saved_models/SMOTE_Model_Sep30", pwd))
 joblib.dump(random_forest, model_path)
 
 # Model prediction
