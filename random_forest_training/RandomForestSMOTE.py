@@ -23,28 +23,39 @@ from imblearn.ensemble import BalancedRandomForestClassifier
 #   [4] BalancedTree: type of random forest classifier
 #   [5] Model name: name of our modelrun
 
-n_threads = 2
+print("starting training")
+
+strict = True
+series_name = "SMOTE_Model"
+if strict:
+    series_name = series_name + "_Strict"
+
+
+n_threads = 1
 
 pwd = os.getcwd()
-processed_path = os.path.join(pwd, os.path.relpath("../processed_data", pwd))
+processed_path = os.path.join(pwd, os.path.relpath("../processed_data/", pwd))
 
 
 # Select the data - Hash or int mapped
-X = pd.read_csv(processed_path + "/Pollinator_Plant_int_mapped.csv")
+X = pd.read_csv(processed_path + series_name + "_int_mapping")
+print("x data opened")
 
 # If we're not training with geo data, drop these two colu
 # We're ignoring keyErrors here; essentially, this is "drop if exists"
-X = X.drop(columns=["plant_country_int", "pollinator_country_int",
-                    "plant_country_hash", "pollinator_country_hash"], errors='ignore')
+'''X = X.drop(columns=["plant_country_int", "pollinator_country_int",
+                    "plant_country_hash", "pollinator_country_hash"], errors='ignore') '''
 
 # turn DataFrame into a numpy matrix and normalize it
 X = X.values
 scaler = preprocessing.StandardScaler().fit(X)
 X = scaler.transform(X)
+joblib.dump(scaler, series_name + "_Scaler")
+print("x data transformed, scaler saved")
 
 # read class values
-y = pd.read_csv(processed_path + "/classes.csv").squeeze()
-
+y = pd.read_csv(processed_path + series_name+"_classes.csv").squeeze()
+print("y data opened")
 # Oversample for SMOTE Tree
 oversample = SMOTE()
 over_X, over_y = oversample.fit_resample(X, y)
@@ -54,16 +65,19 @@ X_train, X_test, y_train, y_test = train_test_split(over_X, over_y, test_size=0.
 
 # Create RFC
 random_forest = RandomForestClassifier(n_estimators=200, verbose=1)
-
+print("beginning training")
 # Train the model using the training sets (Build a forest of trees from the training set (X, y))
 with parallel_backend('threading', n_jobs=n_threads):
     random_forest.fit(X_train, y_train.values.ravel())
 
+print("training complete")
 # Save model
 
-model_path = os.path.join(pwd, os.path.relpath("saved_models/SMOTE_Model_Sep30", pwd))
+model_path = os.path.join(pwd, os.path.relpath("saved_models/"+series_name + "_model", pwd))
+
 joblib.dump(random_forest, model_path)
 
+print("model saved. evaluating model")
 # Model prediction
 y_pred = random_forest.predict(X_test)
 
@@ -85,10 +99,10 @@ f1 = f1_score(y_test, y_pred)*100
 cm = confusion_matrix(y_test, y_pred)
 
 # Write our results
-write_path = os.path.join(pwd, os.path.relpath(("saved_models/model_evaluations/SMOTE_RFC_ReducedData.txt"), pwd))
+write_path = os.path.join(pwd, os.path.relpath(("saved_models/model_evaluations/" + series_name + "_evaluation.txt"), pwd))
 
 with open(write_path, "w+") as f:
-    header = "\n* * * * * SMOTE Model Evaluation * * * * *"
+    header = "\n* * * * * MODEL EVALUATION * * * * *"
     f.write(header)
     f.write("\n\t- "+str(n_threads)+" threads")
 
