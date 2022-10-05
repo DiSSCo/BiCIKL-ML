@@ -1,8 +1,0 @@
-#!/bin/bash
-
-cd ../processed_data
-tar xvzf processed_data.tar.gz -C .
-
-cd ../source_data
-tar xvzf other_processed_data.tar.gz -C .
-
