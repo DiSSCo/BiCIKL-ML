@@ -25,7 +25,7 @@ from imblearn.ensemble import BalancedRandomForestClassifier
 
 print("starting training")
 
-strict = True
+strict = False
 series_name = "SMOTE_Model"
 if strict:
     series_name = series_name + "_Strict"
@@ -61,7 +61,7 @@ oversample = SMOTE()
 over_X, over_y = oversample.fit_resample(X, y)
 
 # Split dataset into training set and test set (70% train, 30% test)
-X_train, X_test, y_train, y_test = train_test_split(over_X, over_y, test_size=0.1, stratify=over_y)
+X_train, X_test, y_train, y_test = train_test_split(over_X, over_y, test_size=0.3, stratify=over_y)
 
 # Create RFC
 random_forest = RandomForestClassifier(n_estimators=200, verbose=1)

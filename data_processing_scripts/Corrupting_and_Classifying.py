@@ -24,11 +24,25 @@ def get_taxon_level(p):
     return "other"
 
 
-rewrite = False  # Set this to true if you want to re-do the corrupted data
+def getSpecies(sci_name): # Get species name from scientific name (i.e. "genus species")
+    try:
+        sp_name = sci_name.split()[1]
+    except IndexError:
+        return sci_name
+    return sp_name
+
+
+strict = False
+series_name = "SMOTE_Model"
+if strict:
+    series_name = series_name + "_Strict"
+
+
+rewrite = True# Set this to true if you want to re-do the corrupted data
 pd.options.mode.chained_assignment = None
 
 pwd = os.path.dirname(__file__)
-source_data_path = os.path.join(pwd, os.path.relpath("../source_data/Poll_Plant_Corrected_Consolidated.csv", pwd))
+source_data_path = os.path.join(pwd, os.path.relpath("../source_data/Poll_Plant_Smote_Data.csv", pwd))
 
 PollPlants = pd.read_csv(source_data_path, encoding='cp1252')
 
@@ -39,6 +53,10 @@ PollPlants = pd.read_csv(source_data_path, encoding='cp1252')
 subset = (PollPlants.drop(columns=["pollinator_taxonKey", "plant_taxonKey"]))
 subset.drop_duplicates(inplace=True)
 subset.dropna(inplace=True)
+
+subset["pollinator_species"] = subset["pollinator_species"].apply(lambda tax: getSpecies(tax))
+subset["plant_species"] = subset["plant_species"].apply(lambda tax: getSpecies(tax))
+
 
 # Drop country information and save it to a separate DF.
 # This will be used to check that a pollinator-plant pair is valid, even if their countries are different
@@ -70,9 +88,9 @@ poll_num = polls.shape[0]
 plant_num = plants.shape[0]
 
 # Path info
-processed_data_path = "../processed_data"
+processed_data_path = "../processed_data/"
 processed_data_path = os.path.join(pwd, os.path.relpath(processed_data_path, pwd))
-corrupted_path = processed_data_path + "/Corrupted_PollPlant_sep29.csv"  # Where we'll save our corrupted data
+corrupted_path = processed_data_path + series_name + "_corrupted_string.csv"  # Where we'll save our corrupted data
 
 # Delete corrupted data file if it exists already
 # Otherwise, we'll be appending to an existing file
@@ -91,11 +109,12 @@ if not os.path.exists(corrupted_path):
         plant_poll_combined.columns = subset.columns
 
         # Drop whichever plant<->poll pairs are actually true (taxon only)
-        #plant_poll_combined = pd.merge(plant_poll_combined, subset_no_geo, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge',axis=1)
+        plant_poll_combined = pd.merge(plant_poll_combined, subset, indicator=True, how='outer').query('_merge=="left_only"').drop('_merge',axis=1)
 
         # We don't want to use our full "pair space" to train the classifier -> this could lead to overfitting
         # Randomly select 70% of 0s to be used in training
-        plant_poll_combined = plant_poll_combined.sample(frac=0.7)
+        if not strict:
+            plant_poll_combined = plant_poll_combined.sample(frac=0.7)
 
         # Write to csv (we do this every round, otherwise the resulting dataframe grows too much per loop)
         # Funny enough, writing to disk each loop is faster than appending thousands of rows
@@ -103,6 +122,7 @@ if not os.path.exists(corrupted_path):
         plant_poll_combined.to_csv(corrupted_path, index=False, mode='a', header=not os.path.exists(corrupted_path))
 
 corrupted = pd.read_csv(corrupted_path)  # Pull the corrupted data that we wrote to disk
+
 
 # Set classes, rejoin dataframes
 subset["class"] = 1
@@ -136,12 +156,12 @@ for column in X.columns:
     str_to_int = {value: i for i, value in enumerate(sorted(list(X[column].unique())))}
     # create column with ints
     X[column + "_int"] = X[column].apply(lambda val: str_to_int[val])
-    if "country" not in column:
-        taxonomy_enum = {**taxonomy_enum, **str_to_int}
+    taxonomy_enum = {**taxonomy_enum, **str_to_int}
     del X[column]  # remove original column (with strings)
 
-with open(processed_data_path + "/taxonomy_mapping2.txt", 'w+') as f:
-    f.write(json.dumps(taxonomy_enum))
+with open(processed_data_path + "/" + series_name + "_taxon_mapping", 'w+') as f:
+    f.write(json.dumps(taxonomy_enum, indent=2))
+
 '''
 taxonomy_hash = {}
 for column in X_hashed.columns:
@@ -156,10 +176,10 @@ for column in X_hashed.columns:
     '''
 
 # Save work to CSV
-subset.to_csv((processed_data_path + "/Pollinator_Plant_Interactions.csv"), index=False)
+subset.to_csv((processed_data_path + "/" + series_name + "_subsetted_interactions.csv"), index=False)
 # X_hashed.to_csv((processed_data_path + "/Pollinator_Plant_hash_mapped.csv"), index=False)
-X.to_csv((processed_data_path + "/Pollinator_Plant_int_mapped.csv"), index=False)
-y.to_csv((processed_data_path + "/classes.csv"), index=False)
+X.to_csv((processed_data_path + "/" + series_name + "_int_mapping.csv"), index=False)
+y.to_csv((processed_data_path + "/" + series_name + "_classes.csv"), index=False)
 
 
 
